@@ -38,7 +38,7 @@ void RunTask1(int episodes)
 	{
 		game->newEpisode();
 		std::cout << "Episode #" << i + 1 << std::endl;
-		int x = 0;
+		int x = -1;
 		while (!game->isEpisodeFinished())
 		{
 			const auto& gamestate = game->getState();
@@ -47,16 +47,17 @@ void RunTask1(int episodes)
 
 			cv::extractChannel(screenBuff, greyscale, 2);
 
-			cv:threshold(greyscale, greyscale, 175, 255, cv::THRESH_BINARY);
-
+			cv:threshold(greyscale, greyscale, 140, 255, cv::THRESH_BINARY);
 			for (int c = 0; c < 640; c++) 
 			{
 				if ((int)greyscale.at<uchar>(cv::Point(c, 240)) == 255)
 				{
 					x = c;
-					//std::cout << x << " ";
-					//game->makeAction({ 1, 0, 0});
 				}
+			}
+			if ((int)greyscale.at<uchar>(cv::Point(320, 240)) == 255)
+			{
+				double reward = game->makeAction({ 0, 0, 1 });
 			}
 			if (x <= 320)
 			{
@@ -64,17 +65,9 @@ void RunTask1(int episodes)
 			}
 			else
 			{
-				//std::cout << x << '\n';
 				game->makeAction({ 0, 1, 0 });
 			}
-			if ((int)greyscale.at<uchar>(cv::Point(320, 240)) == 255)
-			{
-				double reward = game->makeAction({ 0, 0, 1 });
-			}
 			cv::imshow("Output Window", greyscale);
-			//double reward = game->makeAction({ 1 });
-
-			//std::cout << reward << " ";
 			cv::waitKey(sleepTime);
 		}
 
