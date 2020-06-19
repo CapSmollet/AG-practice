@@ -14,6 +14,7 @@ std::string path = "C:\\practice\\practice\\vizdoom";
 auto screenBuff = cv::Mat(480, 640, CV_8UC3);
 
 void RunTask1(int episodes) {
+  int reward = 0;
   try {
     game->loadConfig(path + "\\scenarios\\task2.cfg");
     game->init();
@@ -81,8 +82,9 @@ void RunTask1(int episodes) {
       cv::waitKey(sleepTime);
     }
     Sleep(500);
-    std::cout << std::endl << game->getTotalReward() << std::endl;
+    reward =  game->getTotalReward() + reward;
   }
+  std::cout << reward / episodes;
 }
 
 int main() {
