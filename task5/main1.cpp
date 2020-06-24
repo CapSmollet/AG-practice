@@ -3,6 +3,7 @@
 #include <ViZDoom.h>
 #include <chrono>
 #include <thread>
+#include <Windows.h>
 
 vizdoom::DoomGame* game = new vizdoom::DoomGame();
 auto screenBuff = cv::Mat(480, 640, CV_8UC3);
@@ -22,46 +23,65 @@ void RunTask1(int episodes)
 	}
 
 	auto greyscale = cv::Mat(480, 640, CV_8UC1);
+	auto walls = cv::Mat(480, 640, CV_8UC1);
 
-	//std::vector<double> action;
-
-	unsigned int sleepTime = 2000 / vizdoom::DEFAULT_TICRATE;
+	int* run = new int[4];
+	unsigned int sleepTime = 1000 / vizdoom::DEFAULT_TICRATE;
 	for (auto i = 0; i < episodes; i++)
 	{
 		game->newEpisode();
 		std::cout << "Episode #" << i + 1 << std::endl;
-		while (!game->isEpisodeFinished())
-		{
+		while (!game->isEpisodeFinished()) {
+			for (int k = 0; k < 4; k++) run[k] = 0;
+
 			const auto& gamestate = game->getState();
 
 			std::memcpy(screenBuff.data, gamestate->screenBuffer->data(), gamestate->screenBuffer->size());
 
-			cv::extractChannel(screenBuff, greyscale, 2);
+			cv::extractChannel(screenBuff, greyscale, 0);
+			cv::threshold(greyscale, greyscale, 200, 255, cv::THRESH_BINARY);
+			//cv::extractChannel(screenBuff, walls, 0);
 
-		cv:threshold(greyscale, greyscale, 200, 255, cv::THRESH_BINARY);
 
-
-                        //Надо боковые допилить
-			for (int i = 0; i < 640; i++)
+			for (int k = 0; k < 640; k++)
 			{
-				if ((int)greyscale.at<uchar>(cv::Point(i, 220)) == 255)
+				if ((int)greyscale.at<uchar>(cv::Point(k, 220)) == 255)
 				{
-					if (i <= 320)
+					if (i <= 160)
 					{
-						game->makeAction({ 0, 1 });
-						break;
+						run[0] = 1;
+						//game->makeAction({ 0, 1 });
 					}
-					if (i > 320)
+					if ((i > 160) && (i <= 320))
 					{
-						game->makeAction({ 1, 0 });
-						break;
+						run[1] = 11;
+						//game->makeAction({ 0, 1 });
 					}
+					if ((i > 320) && (i <= 480))
+					{
+						run[2] = 2;
+						//game->makeAction({ 1, 0 });
+					}
+					if ((i > 480) && (i <= 640))
+					{
+						run[2] = 22;
+						//game->makeAction({ 1, 0 });
+					}
+					break;
 				}
 			}
+
+			if (run[0] == 1) game->makeAction({ 0, 1 });
+			if (run[1] == 11) game->makeAction({ 1, 0 });
+			if (run[0] == 2) game->makeAction({ 0, 1 });
+			if (run[1] == 22) game->makeAction({ 1, 0 });
+
+			//for(int )
 
 			game->makeAction({ 0, 0 });
 			cv::imshow("Output Window", greyscale);
 			cv::waitKey(1);
+			cv::threshold(greyscale, walls, 150, 255, cv::THRESH_BINARY);
 		}
 
 		sum += game->getTotalReward();
@@ -74,7 +94,7 @@ int main() {
 	game->setViZDoomPath("../vizdoom/vizdoom");
 	game->setDoomGamePath("../vizdoom/freedoom2.wad");
 
-	cv::namedWindow("Output Window", cv::WINDOW_AUTOSIZE);
+	//cv::namedWindow("Output Window", cv::WINDOW_AUTOSIZE);
 
 	auto episodes = 10;
 
