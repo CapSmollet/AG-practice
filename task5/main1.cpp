@@ -40,6 +40,8 @@ void RunTask1(int episodes)
 
 		cv:threshold(greyscale, greyscale, 200, 255, cv::THRESH_BINARY);
 
+
+                        //Надо боковые допилить
 			for (int i = 0; i < 640; i++)
 			{
 				if ((int)greyscale.at<uchar>(cv::Point(i, 220)) == 255)
