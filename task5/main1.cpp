@@ -8,6 +8,15 @@ vizdoom::DoomGame* game = new vizdoom::DoomGame();
 auto screenBuff = cv::Mat(480, 640, CV_8UC3);
 const unsigned int sleepTime = 1000 / vizdoom::DEFAULT_TICRATE;
 double sum = 0;
+//const float EPS = 10;
+
+/*void game_init() {
+	game->setScreenResolution(vizdoom::RES_640X480);
+	game->setLabelsBufferEnabled(true); // add this
+	game->setWindowVisible(true);
+	game->setRenderWeapon(true);
+	game->setRenderHud(true);
+}*/
 
 void RunTask1(int episodes)
 {
@@ -40,7 +49,7 @@ void RunTask1(int episodes)
 
 		cv:threshold(greyscale, greyscale, 200, 255, cv::THRESH_BINARY);
 
-			//int found = 0;
+			int found = 0;
 			for (int i = 0; i < 640; i++)
 			{
 				if ((int)greyscale.at<uchar>(cv::Point(i, 220)) == 255)
@@ -55,10 +64,14 @@ void RunTask1(int episodes)
 						game->makeAction({ 1, 0 });
 						break;
 					}
-					break;
+					found = 1;
+					//break;
 				}
 			}
-
+			if (found == 0)
+			{
+				game->makeAction({ 0, 0 });
+			}
 			cv::imshow("Output Window", greyscale);
 			cv::waitKey(1);
 		}
